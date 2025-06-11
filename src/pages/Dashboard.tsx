@@ -5,20 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  BarChart3, 
-  Target, 
-  TrendingUp, 
-  Activity, 
-  Heart, 
   LogOut, 
   Calendar,
   Users,
-  Building2
+  Building2,
+  BarChart3
 } from "lucide-react";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
-import MetricsCard from "@/components/dashboard/MetricsCard";
+import LagMetricsCard from "@/components/dashboard/LagMetricsCard";
+import LeadMeasuresModal from "@/components/dashboard/LeadMeasuresModal";
 import DepartmentHealth from "@/components/dashboard/DepartmentHealth";
-import FourDXChart from "@/components/dashboard/FourDXChart";
 
 interface User {
   username: string;
@@ -26,10 +22,30 @@ interface User {
   departments: string[];
 }
 
+interface LagMetric {
+  id: string;
+  name: string;
+  value: number;
+  target: number;
+  trend: number;
+  leads: {
+    id: string;
+    name: string;
+    value: number;
+    target: number;
+    trend: number;
+  }[];
+}
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [selectedMonths, setSelectedMonths] = useState<string[]>(["2024-06"]);
+  const [selectedQuarters, setSelectedQuarters] = useState<string[]>(["Q2"]);
+  const [startMonth, setStartMonth] = useState("2024-01");
+  const [endMonth, setEndMonth] = useState("2024-06");
+  const [selectedLag, setSelectedLag] = useState<LagMetric | null>(null);
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,19 +62,149 @@ const Dashboard = () => {
     navigate("/");
   };
 
+  const handleLagClick = (lagId: string) => {
+    const lag = mockLagMetrics.find(l => l.id === lagId);
+    if (lag) {
+      setSelectedLag(lag);
+      setIsLeadModalOpen(true);
+    }
+  };
+
+  // Generate different mock data based on selected time period
+  const generateMockData = () => {
+    let baseMultiplier = 1;
+    let periodCount = 1;
+
+    if (selectedPeriod === "monthly") {
+      periodCount = selectedMonths.length;
+      baseMultiplier = 0.8 + (periodCount * 0.1);
+    } else if (selectedPeriod === "quarterly") {
+      periodCount = selectedQuarters.length;
+      baseMultiplier = 0.7 + (periodCount * 0.15);
+    } else if (selectedPeriod === "cumulative") {
+      const startIndex = parseInt(startMonth.split('-')[1]);
+      const endIndex = parseInt(endMonth.split('-')[1]);
+      periodCount = Math.max(1, endIndex - startIndex + 1);
+      baseMultiplier = 0.6 + (periodCount * 0.08);
+    }
+
+    return [
+      {
+        id: "lag1",
+        name: "Customer Satisfaction Score",
+        value: Math.round(75 * baseMultiplier),
+        target: 85,
+        trend: Math.round((Math.random() - 0.5) * 10),
+        leads: [
+          {
+            id: "lead1",
+            name: "Response Time",
+            value: Math.round(88 * baseMultiplier),
+            target: 90,
+            trend: Math.round((Math.random() - 0.5) * 8)
+          },
+          {
+            id: "lead2", 
+            name: "First Call Resolution",
+            value: Math.round(82 * baseMultiplier),
+            target: 85,
+            trend: Math.round((Math.random() - 0.5) * 6)
+          },
+          {
+            id: "lead3",
+            name: "Agent Training Hours",
+            value: Math.round(95 * baseMultiplier),
+            target: 80,
+            trend: Math.round((Math.random() - 0.5) * 4)
+          }
+        ]
+      },
+      {
+        id: "lag2",
+        name: "Revenue Growth",
+        value: Math.round(68 * baseMultiplier),
+        target: 75,
+        trend: Math.round((Math.random() - 0.5) * 12),
+        leads: [
+          {
+            id: "lead4",
+            name: "Sales Calls Made",
+            value: Math.round(92 * baseMultiplier),
+            target: 85,
+            trend: Math.round((Math.random() - 0.5) * 10)
+          },
+          {
+            id: "lead5",
+            name: "Lead Conversion Rate",
+            value: Math.round(76 * baseMultiplier),
+            target: 80,
+            trend: Math.round((Math.random() - 0.5) * 8)
+          }
+        ]
+      },
+      {
+        id: "lag3",
+        name: "Employee Retention",
+        value: Math.round(89 * baseMultiplier),
+        target: 85,
+        trend: Math.round((Math.random() - 0.5) * 5),
+        leads: [
+          {
+            id: "lead6",
+            name: "Manager Check-ins",
+            value: Math.round(85 * baseMultiplier),
+            target: 90,
+            trend: Math.round((Math.random() - 0.5) * 7)
+          },
+          {
+            id: "lead7",
+            name: "Training Completion",
+            value: Math.round(94 * baseMultiplier),
+            target: 85,
+            trend: Math.round((Math.random() - 0.5) * 3)
+          },
+          {
+            id: "lead8",
+            name: "Work-Life Balance Score",
+            value: Math.round(78 * baseMultiplier),
+            target: 80,
+            trend: Math.round((Math.random() - 0.5) * 9)
+          }
+        ]
+      },
+      {
+        id: "lag4",
+        name: "Product Quality Score",
+        value: Math.round(91 * baseMultiplier),
+        target: 88,
+        trend: Math.round((Math.random() - 0.5) * 6),
+        leads: [
+          {
+            id: "lead9",
+            name: "Quality Inspections",
+            value: Math.round(96 * baseMultiplier),
+            target: 90,
+            trend: Math.round((Math.random() - 0.5) * 4)
+          },
+          {
+            id: "lead10",
+            name: "Defect Rate",
+            value: Math.round(87 * baseMultiplier),
+            target: 85,
+            trend: Math.round((Math.random() - 0.5) * 8)
+          }
+        ]
+      }
+    ];
+  };
+
+  const mockLagMetrics = generateMockData();
+
   if (!user) {
     return <div>Loading...</div>;
   }
 
-  // Mock data - in real app, this would come from SharePoint
-  const mockMetrics = {
-    wig: { value: 85, target: 90, trend: 5 },
-    lag: { value: 78, target: 80, trend: -2 },
-    lead: { value: 92, target: 85, trend: 8 },
-    activity: { value: 156, target: 150, trend: 12 }
-  };
-
-  const departmentHealth = Math.round((mockMetrics.lag.value / mockMetrics.lag.target) * 100);
+  const departmentHealth = Math.round(mockLagMetrics.reduce((acc, lag) => acc + (lag.value / lag.target), 0) / mockLagMetrics.length * 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5">
@@ -75,8 +221,8 @@ const Dashboard = () => {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">4DX Executive Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Life Makers Egypt</p>
+                <h1 className="text-2xl font-bold text-foreground">LAG Measures Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Life Makers Egypt - 4DX Methodology</p>
               </div>
             </div>
             
@@ -111,53 +257,70 @@ const Dashboard = () => {
           setSelectedPeriod={setSelectedPeriod}
           selectedMonths={selectedMonths}
           setSelectedMonths={setSelectedMonths}
+          selectedQuarters={selectedQuarters}
+          setSelectedQuarters={setSelectedQuarters}
+          startMonth={startMonth}
+          setStartMonth={setStartMonth}
+          endMonth={endMonth}
+          setEndMonth={setEndMonth}
         />
 
-        {/* 4DX Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricsCard
-            title="WIG (Wildly Important Goal)"
-            value={mockMetrics.wig.value}
-            target={mockMetrics.wig.target}
-            trend={mockMetrics.wig.trend}
-            icon={Target}
-            color="wig"
-            unit="%"
-          />
-          <MetricsCard
-            title="LAG Measures"
-            value={mockMetrics.lag.value}
-            target={mockMetrics.lag.target}
-            trend={mockMetrics.lag.trend}
-            icon={BarChart3}
-            color="lag"
-            unit="%"
-          />
-          <MetricsCard
-            title="LEAD Measures"
-            value={mockMetrics.lead.value}
-            target={mockMetrics.lead.target}
-            trend={mockMetrics.lead.trend}
-            icon={TrendingUp}
-            color="lead"
-            unit="%"
-          />
-          <MetricsCard
-            title="Activity Score"
-            value={mockMetrics.activity.value}
-            target={mockMetrics.activity.target}
-            trend={mockMetrics.activity.trend}
-            icon={Activity}
-            color="activity"
-            unit=""
-          />
+        {/* LAG Metrics Grid */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <BarChart3 className="w-6 h-6 text-lag" />
+            <h2 className="text-2xl font-bold text-foreground">LAG Measures</h2>
+            <Badge variant="outline" className="border-lag text-lag">
+              {mockLagMetrics.length} Active Measures
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+            {mockLagMetrics.map((lag) => (
+              <LagMetricsCard
+                key={lag.id}
+                lag={lag}
+                onClick={handleLagClick}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Charts and Health */}
+        {/* Department Health */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <FourDXChart user={user} selectedMonths={selectedMonths} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Period Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    {selectedPeriod === "monthly" && `Viewing ${selectedMonths.length} selected months`}
+                    {selectedPeriod === "quarterly" && `Viewing ${selectedQuarters.length} selected quarters`}
+                    {selectedPeriod === "cumulative" && `Cumulative data from ${startMonth} to ${endMonth}`}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {mockLagMetrics.map((lag) => {
+                      const achievementRate = (lag.value / lag.target) * 100;
+                      return (
+                        <div key={lag.id} className="p-3 bg-muted/50 rounded-lg">
+                          <h4 className="font-semibold text-xs text-muted-foreground mb-1">{lag.name}</h4>
+                          <div className="text-lg font-bold text-foreground">{Math.round(achievementRate)}%</div>
+                          <p className="text-xs text-muted-foreground">Achievement Rate</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+          
           <div>
             <DepartmentHealth 
               department={user.role === "CEO" ? "Organization" : user.departments[0]}
@@ -165,30 +328,15 @@ const Dashboard = () => {
             />
           </div>
         </div>
-
-        {/* Additional Insights for CEO */}
-        {user.role === "CEO" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                Executive Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {["HR", "Finance", "Operations", "Marketing"].map((dept) => (
-                  <div key={dept} className="p-4 bg-muted/50 rounded-lg">
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-2">{dept}</h4>
-                    <div className="text-2xl font-bold text-foreground">{Math.floor(Math.random() * 20) + 75}%</div>
-                    <p className="text-xs text-muted-foreground">Department Health</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {/* Lead Measures Modal */}
+      <LeadMeasuresModal
+        isOpen={isLeadModalOpen}
+        onClose={() => setIsLeadModalOpen(false)}
+        lagName={selectedLag?.name || ""}
+        leads={selectedLag?.leads || []}
+      />
     </div>
   );
 };
