@@ -44,10 +44,10 @@ const LagMetricsCard = ({ lag, onClick }: LagMetricsCardProps) => {
         <div className="space-y-1">
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-foreground">
-              {lag.value}%
+              {lag.value}/{lag.target}
             </span>
             <span className="text-sm text-muted-foreground">
-              / {lag.target}%
+              ({Math.round(achievementRate)}%)
             </span>
             {isOverTarget && (
               <Badge variant="default" className="bg-green-500 text-white text-xs">

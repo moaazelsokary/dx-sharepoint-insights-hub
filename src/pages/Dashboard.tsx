@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,10 +40,10 @@ interface LagMetric {
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(["2024-06"]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(["2025-06"]);
   const [selectedQuarters, setSelectedQuarters] = useState<string[]>(["Q2"]);
-  const [startMonth, setStartMonth] = useState("2024-01");
-  const [endMonth, setEndMonth] = useState("2024-06");
+  const [startMonth, setStartMonth] = useState("2025-01");
+  const [endMonth, setEndMonth] = useState("2025-06");
   const [selectedLag, setSelectedLag] = useState<LagMetric | null>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -212,7 +213,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center p-2">
+              <div className="w-20 h-20 flex items-center justify-center p-2">
                 <img 
                   src="/lovable-uploads/5e72745e-18ec-46d6-8375-e9912bdb8bdd.png" 
                   alt="Logo" 
@@ -309,7 +310,7 @@ const Dashboard = () => {
                       return (
                         <div key={lag.id} className="p-3 bg-muted/50 rounded-lg">
                           <h4 className="font-semibold text-xs text-muted-foreground mb-1">{lag.name}</h4>
-                          <div className="text-lg font-bold text-foreground">{Math.round(achievementRate)}%</div>
+                          <div className="text-lg font-bold text-foreground">{lag.value}/{lag.target} ({Math.round(achievementRate)}%)</div>
                           <p className="text-xs text-muted-foreground">Achievement Rate</p>
                         </div>
                       );

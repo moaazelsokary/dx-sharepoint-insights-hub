@@ -48,10 +48,10 @@ const LeadMeasuresModal = ({ isOpen, onClose, lagName, leads }: LeadMeasuresModa
                   <div className="space-y-1">
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold text-foreground">
-                        {lead.value}%
+                        {lead.value}/{lead.target}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        / {lead.target}%
+                        ({Math.round(achievementRate)}%)
                       </span>
                       {isOverTarget && (
                         <Badge variant="default" className="bg-green-500 text-white text-xs">
