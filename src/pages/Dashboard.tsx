@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -213,16 +212,16 @@ const Dashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center p-2">
                 <img 
                   src="/lovable-uploads/5e72745e-18ec-46d6-8375-e9912bdb8bdd.png" 
                   alt="Logo" 
-                  className="w-8 h-8 object-contain"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">LAG Measures Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Life Makers Egypt - 4DX Methodology</p>
+                <p className="text-sm text-muted-foreground">Life Makers Foundation - 4DX Methodology</p>
               </div>
             </div>
             

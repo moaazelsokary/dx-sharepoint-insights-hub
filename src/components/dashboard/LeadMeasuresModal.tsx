@@ -1,10 +1,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TrendingUp, TrendingDown, X } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface LeadMeasure {
   id: string;
@@ -26,11 +25,8 @@ const LeadMeasuresModal = ({ isOpen, onClose, lagName, leads }: LeadMeasuresModa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Lead Measures for: {lagName}</span>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
+          <DialogTitle>
+            Lead Measures for: {lagName}
           </DialogTitle>
         </DialogHeader>
         
