@@ -61,7 +61,7 @@ const SignIn = () => {
       <div className="w-full max-w-md space-y-8">
         {/* Logo and Header */}
         <div className="text-center space-y-4">
-          <div className="mx-auto w-24 h-24 bg-primary rounded-xl flex items-center justify-center">
+          <div className="mx-auto w-24 h-24 flex items-center justify-center">
             <img 
               src="/lovable-uploads/5e72745e-18ec-46d6-8375-e9912bdb8bdd.png" 
               alt="Life Makers Egypt" 
@@ -123,15 +123,6 @@ const SignIn = () => {
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm font-medium text-muted-foreground mb-2">Demo Credentials:</p>
-              <div className="text-xs space-y-1 text-muted-foreground">
-                <p><strong>CEO:</strong> CEO / password123</p>
-                <p><strong>Departments:</strong> hr, finance, operations, marketing / password123</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
