@@ -9,12 +9,17 @@ import {
   Calendar,
   Users,
   Building2,
-  BarChart3
+  BarChart3,
+  RefreshCw,
+  Database
 } from "lucide-react";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import LagMetricsCard from "@/components/dashboard/LagMetricsCard";
 import LeadMeasuresModal from "@/components/dashboard/LeadMeasuresModal";
 import DepartmentHealth from "@/components/dashboard/DepartmentHealth";
+import SharePointAuth from "@/components/sharepoint/SharePointAuth";
+import { useSharePointData } from "@/hooks/useSharePointData";
+import { toast } from "@/hooks/use-toast";
 
 interface User {
   username: string;
@@ -46,7 +51,11 @@ const Dashboard = () => {
   const [endMonth, setEndMonth] = useState("2025-06");
   const [selectedLag, setSelectedLag] = useState<LagMetric | null>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [isSharePointAuthenticated, setIsSharePointAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  // SharePoint data hook
+  const sharePointData = useSharePointData(isSharePointAuthenticated);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -63,14 +72,34 @@ const Dashboard = () => {
   };
 
   const handleLagClick = (lagId: string) => {
-    const lag = mockLagMetrics.find(l => l.id === lagId);
+    const lag = currentLagMetrics.find(l => l.id === lagId);
     if (lag) {
       setSelectedLag(lag);
       setIsLeadModalOpen(true);
     }
   };
 
-  // Generate different mock data based on selected time period
+  const handleSharePointAuthChange = (isAuthenticated: boolean) => {
+    setIsSharePointAuthenticated(isAuthenticated);
+    if (isAuthenticated) {
+      toast({
+        title: "SharePoint Connected",
+        description: "Now displaying live data from SharePoint",
+      });
+    }
+  };
+
+  const handleRefreshData = () => {
+    if (isSharePointAuthenticated) {
+      sharePointData.refetch();
+      toast({
+        title: "Data Refreshed",
+        description: "Latest data fetched from SharePoint",
+      });
+    }
+  };
+
+  // Generate different mock data based on selected time period (fallback when SharePoint not connected)
   const generateMockData = () => {
     let baseMultiplier = 1;
     let periodCount = 1;
@@ -198,13 +227,16 @@ const Dashboard = () => {
     ];
   };
 
-  const mockLagMetrics = generateMockData();
+  // Use SharePoint data if available, otherwise fall back to mock data
+  const currentLagMetrics = isSharePointAuthenticated && sharePointData.lagMeasures.length > 0 
+    ? sharePointData.lagMeasures 
+    : generateMockData();
 
   if (!user) {
     return <div>Loading...</div>;
   }
 
-  const departmentHealth = Math.round(mockLagMetrics.reduce((acc, lag) => acc + (lag.value / lag.target), 0) / mockLagMetrics.length * 100);
+  const departmentHealth = Math.round(currentLagMetrics.reduce((acc, lag) => acc + (lag.value / lag.target), 0) / currentLagMetrics.length * 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5">
@@ -227,6 +259,12 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center gap-4">
+              {isSharePointAuthenticated && (
+                <Button variant="outline" size="sm" onClick={handleRefreshData}>
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Refresh Data
+                </Button>
+              )}
               <div className="flex items-center gap-2">
                 {user.role === "CEO" ? (
                   <Badge variant="secondary" className="bg-accent text-accent-foreground">
@@ -251,6 +289,30 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* SharePoint Integration */}
+        <SharePointAuth onAuthChange={handleSharePointAuthChange} />
+
+        {/* Data Source Indicator */}
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" />
+                <span className="font-medium">Data Source:</span>
+                <Badge variant={isSharePointAuthenticated ? "default" : "secondary"}>
+                  {isSharePointAuthenticated ? "SharePoint Live Data" : "Demo Data"}
+                </Badge>
+              </div>
+              {sharePointData.isLoading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Loading SharePoint data...
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Filters */}
         <DashboardFilters
           selectedPeriod={selectedPeriod}
@@ -271,12 +333,12 @@ const Dashboard = () => {
             <BarChart3 className="w-6 h-6 text-lag" />
             <h2 className="text-2xl font-bold text-foreground">LAG Measures</h2>
             <Badge variant="outline" className="border-lag text-lag">
-              {mockLagMetrics.length} Active Measures
+              {currentLagMetrics.length} Active Measures
             </Badge>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-            {mockLagMetrics.map((lag) => (
+            {currentLagMetrics.map((lag) => (
               <LagMetricsCard
                 key={lag.id}
                 lag={lag}
@@ -305,7 +367,7 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {mockLagMetrics.map((lag) => {
+                    {currentLagMetrics.map((lag) => {
                       const achievementRate = (lag.value / lag.target) * 100;
                       return (
                         <div key={lag.id} className="p-3 bg-muted/50 rounded-lg">
